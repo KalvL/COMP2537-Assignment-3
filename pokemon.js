@@ -4,9 +4,16 @@ const setup = async () => {
 
   const pokemon = response.data.results;
   $('#pokemon').empty();
-  var newList = $('<ol></ol>');
   for (let i = 0; i < pokemon.length; i++) {
-    newList.append(`<li>${pokemon[i].name}</li>`);
+    let innerResponse = await axios.get(`${pokemon[i].url}`);
+    let thisPokemon = innerResponse.data;
+    $('#pokemon').append(`
+    <div class="pokeCard card">
+      <h3>${pokemon[i].name}</h3>
+      <img src="${thisPokemon.sprites.front_default}" alt="${thisPokemon.name}">
+      <button type="button" class="btn btn-primary"> More </button>
+    </div>
+    `);
   }
   $('#pokemon').append(newList);
 
