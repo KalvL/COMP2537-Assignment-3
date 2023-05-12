@@ -2,10 +2,15 @@ const PAGE_SIZE = 10
 let currentPage = 1;
 let pokemons = []
 
+const numPokemonDisplayed = () => {
+  $('#numDisplayed').empty();
+  $('#numDisplayed').append(`<h3>Showing ${currentPage * PAGE_SIZE} of ${pokemons.length}</h3>`)
+}
+
 
 const updatePaginationDiv = (currentPage, numPages) => {
   $('#pagination').empty()
-
+  numPokemonDisplayed();
   const startPage = 1;
   const endPage = numPages;
   if (currentPage > 3) {
@@ -67,7 +72,6 @@ const setup = async () => {
   $('#pokeCards').empty()
   let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
   pokemons = response.data.results;
-
 
   paginate(currentPage, PAGE_SIZE, pokemons)
   const numPages = Math.ceil(pokemons.length / PAGE_SIZE)
