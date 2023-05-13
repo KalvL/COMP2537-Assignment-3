@@ -1,6 +1,19 @@
 const PAGE_SIZE = 10
 let currentPage = 1;
-let pokemons = []
+let pokemons = [];
+let types = [];
+let selectedFilters = [];
+
+const filter = async () => {
+  let response = await axios.get('https://pokeapi.co/api/v2/type');
+  types = response.data.results;
+  types.forEach(async (types) => {
+    const res = await axios.get(types.url)
+    $('#filter').append(`
+    <input type="checkbox" class="filterCheck" id="${res.data.name}">&nbsp${res.data.name}&emsp;</input>
+    `)
+  });
+}
 
 const numPokemonDisplayed = () => {
   $('#numDisplayed').empty();
@@ -67,7 +80,7 @@ const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
 
 const setup = async () => {
   // test out poke api using axios here
-
+  filter();
 
   $('#pokeCards').empty()
   let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
@@ -77,6 +90,19 @@ const setup = async () => {
   const numPages = Math.ceil(pokemons.length / PAGE_SIZE)
   updatePaginationDiv(currentPage, numPages)
 
+  $('body').on('click', ".filterCheck", async function (e) {
+    console.log(e.target.id);
+    if (document.getElementById(e.target.id).checked) {
+      selectedFilters.push(e.target.id);
+    } else {
+      for (let i = 0; i < selectedFilters.length; i++) {
+        if (selectedFilters[i] == e.target.id) {
+          selectedFilters.splice(i, 1);
+        }
+      }
+    }
+    console.log(selectedFilters);
+  })
 
 
   // pop up modal when clicking on a pokemon card
@@ -90,6 +116,7 @@ const setup = async () => {
     // console.log("types: ", types);
 
     console.log(res.data.abilities.map((ability) => ability.ability.name).join(''));
+    console.log(res.data.types.map((type) => type.type.name).join(''));
 
 
     $('.modal-body').html(`
@@ -127,7 +154,6 @@ const setup = async () => {
   $('body').on('click', ".numberedButtons", async function (e) {
     currentPage = Number(e.target.value)
     paginate(currentPage, PAGE_SIZE, pokemons)
-
     //update pagination buttons
     updatePaginationDiv(currentPage, numPages)
   })
