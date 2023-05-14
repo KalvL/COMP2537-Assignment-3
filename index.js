@@ -18,7 +18,7 @@ const filter = async () => {
 
 const numPokemonDisplayed = () => {
   $('#numDisplayed').empty();
-  $('#numDisplayed').append(`<h3>Showing ${currentPage * PAGE_SIZE} of ${pokemons.length}</h3>`)
+  $('#numDisplayed').append(`<h3>Showing ${PAGE_SIZE} of ${pokemons.length}</h3>`)
 }
 
 
@@ -77,7 +77,7 @@ const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
 
   let index = 0;
   $('#pokeCards').empty()
-  selected_pokemons.forEach(async (pokemon) => {
+  selected_pokemons.map(async (pokemon) => {
     const res = await axios.get(pokemon.url)
     console.log(res.data.types.map((type) => type.type.name).sort());
     console.log(selectedFilters.sort());
