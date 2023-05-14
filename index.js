@@ -3,6 +3,7 @@ let currentPage = 1;
 let pokemons = [];
 let types = [];
 let selectedFilters = [];
+let filteredPokemon = [];
 
 const filter = async () => {
   let response = await axios.get('https://pokeapi.co/api/v2/type');
@@ -60,21 +61,56 @@ const updatePaginationDiv = (currentPage, numPages) => {
 
 }
 
+const updatePokemons = async (pokemons) => {
+  let response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
+  pokemons = response.data.results;
+  pokemons.forEach(async (pokemon) => {
+    const res = await axios.get(pokemon.url)
+    
+  });
+}
+
+
 const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
+
   selected_pokemons = pokemons.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
+  let index = 0;
   $('#pokeCards').empty()
   selected_pokemons.forEach(async (pokemon) => {
     const res = await axios.get(pokemon.url)
-    $('#pokeCards').append(`
-      <div class="pokeCard card" pokeName=${res.data.name}   >
-        <h3>${res.data.name.toUpperCase()}</h3> 
-        <img src="${res.data.sprites.front_default}" alt="${res.data.name}"/>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#pokeModal">
-          More
-        </button>
-        </div>  
-        `)
+    console.log(res.data.types.map((type) => type.type.name).sort());
+    console.log(selectedFilters.sort());
+    if (res.data.types.map((type) => type.type.name).sort().join('') == selectedFilters.sort().join('') || selectedFilters.length == 0) {
+
+    }
+    // Check if pokemon type matches selected filters.
+    let typeMatch = true;
+    for (let i = 0; i < selectedFilters.length; i++) {
+      if (selectedFilters.length == 0 || selectedFilters.sort()[i] == res.data.types.map((type) => type.type.name).sort()[i]) {
+        typeMatch = true;
+      } else {
+        typeMatch = false;
+        break;
+      }
+    }
+    // If pokemon type matches selected filters, add to filteredPokemon array.
+    if (typeMatch) {
+      filteredPokemon.push(selected_pokemons[index]);
+    }
+
+    console.log(filteredPokemon);
+    index++;
+
+    // $('#pokeCards').append(`
+    //   <div class="pokeCard card" pokeName=${res.data.name}   >
+    //     <h3>${res.data.name.toUpperCase()}</h3> 
+    //     <img src="${res.data.sprites.front_default}" alt="${res.data.name}"/>
+    //     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#pokeModal">
+    //       More
+    //     </button>
+    //     </div>  
+    //     `)
   })
 }
 
@@ -91,7 +127,6 @@ const setup = async () => {
   updatePaginationDiv(currentPage, numPages)
 
   $('body').on('click', ".filterCheck", async function (e) {
-    console.log(e.target.id);
     if (document.getElementById(e.target.id).checked) {
       selectedFilters.push(e.target.id);
     } else {
@@ -102,6 +137,8 @@ const setup = async () => {
       }
     }
     console.log(selectedFilters);
+    paginate(currentPage, PAGE_SIZE, pokemons);
+    updatePaginationDiv(currentPage, numPages);
   })
 
 
@@ -157,6 +194,7 @@ const setup = async () => {
     //update pagination buttons
     updatePaginationDiv(currentPage, numPages)
   })
+
 
 }
 
